@@ -3,7 +3,7 @@
 A small self-hosted web app for [Hardcover](https://hardcover.app) librarians and readers. Search for an author and edition-scout shows their Hardcover catalogue with the ebook, audiobook and print editions each book has. In the background it finds the editions Hardcover is **missing**: ebooks and audiobooks that exist, with the ISBN or ASIN, publisher, date and narrator you need to add them on Hardcover.
 
 - **Author search** over Hardcover, or a numeric Hardcover author id.
-- **Catalogue view** for each book, with a status for each format: *On Hardcover*, *Missing* (found elsewhere, with a link), *None found*, or *Checking…*.
+- **Catalogue view** for each book, with a status for each format: *On Hardcover* (with how many editions it has), *Missing* (found elsewhere, with a link), *None found*, or *Checking…*.
 - **Missing on Hardcover report** across all your authors, with CSV and JSON export.
 - **Background checks:** authors you open stay on your list and are re-read from Hardcover daily. When Hardcover gains an edition, the gap closes and the report says so.
 - One ~12 MB Docker image, no database, and state kept in a few JSON files.
@@ -54,7 +54,6 @@ Goodreads has had no public API since 2020. With `SCOUT_GOODREADS=true`, edition
 | `SCOUT_REFRESH_INTERVAL` | `24h` | How often followed authors are re-read from Hardcover. |
 | `SCOUT_PRINT_ONLY_MIN_READERS` | `5` | Print-only books are looked up from this many readers. |
 | `SCOUT_INCLUDE_COMPILATIONS` | `true` | `false` hides boxed sets and omnibuses. |
-| `SCOUT_EDITIONS_PER_FORMAT` | `3` | Hardcover editions shown per format. |
 | `SCOUT_BLOCKED_AUTHORS` | — | Extra placeholder names to hide, comma-separated. "Various", "Unknown", "Misc" and similar are built in. |
 | `SCOUT_DATA_DIR` | `/data` | Where state is kept. |
 | `SCOUT_ADDR` | `:8080` | Listen address. |

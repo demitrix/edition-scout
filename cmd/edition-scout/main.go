@@ -72,8 +72,7 @@ func main() {
 		slog.Warn("HARDCOVER_API_TOKEN is not set; nothing can be looked up until it is")
 	}
 	catalog := &scout.Catalog{HC: hc, Lang: lang,
-		IncludeCompilations: envBool("SCOUT_INCLUDE_COMPILATIONS", true),
-		EditionsPerFormat:   envInt("SCOUT_EDITIONS_PER_FORMAT", 3)}
+		IncludeCompilations: envBool("SCOUT_INCLUDE_COMPILATIONS", true)}
 
 	// Sources, in lookup order per format.
 	var sources []scout.Source

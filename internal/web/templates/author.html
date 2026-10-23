@@ -1,6 +1,6 @@
 {{define "head"}}{{if .Data.Building}}<meta http-equiv="refresh" content="8">{{end}}{{end}}
 {{define "fmtcell"}}
-{{- if eq .State "on-hardcover"}}<span class="chip ok">On Hardcover</span>{{with first .Editions}}{{with .Identifier}}<div class="ed">{{.}}</div>{{end}}{{end}}
+{{- if eq .State "on-hardcover"}}<span class="chip ok">On Hardcover</span><div class="ed">{{plural .Count "edition"}}{{with first .Editions}}{{with .Identifier}} · {{.}}{{end}}{{end}}</div>
 {{- else if eq .State "missing"}}<span class="chip warn">Missing</span>
   {{with first .Editions}}<div class="ed">Found on <a href="{{.URL}}" rel="noopener">{{sourceName .Source}}</a>{{with .Identifier}} · {{.}}{{end}}</div>
   <div class="ed">{{.Publisher}}{{if .Date}} · {{.Date}}{{end}}{{if .Narrators}} · read by {{join .Narrators ", "}}{{end}}{{with .Duration}} · {{.}}{{end}}</div>{{end}}
@@ -41,7 +41,7 @@
   </div></div></td>
   <td>{{template "fmtcell" .Ebook}}</td>
   <td>{{template "fmtcell" .Audio}}</td>
-  <td class="hide-sm">{{if .HasPrint}}<span class="chip ok">On Hardcover</span>{{else}}<span class="muted">—</span>{{end}}</td>
+  <td class="hide-sm">{{if .HasPrint}}<span class="chip ok">On Hardcover</span><div class="ed">{{plural .PrintCount "edition"}}</div>{{else}}<span class="muted">—</span>{{end}}</td>
   <td class="num hide-sm">{{.Readers}}</td>
 </tr>{{else}}<tr><td colspan="5" class="muted">No books to show.</td></tr>{{end}}
 </table></div>

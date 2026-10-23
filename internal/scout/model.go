@@ -77,9 +77,13 @@ type Book struct {
 	Series      string    `json:"series,omitempty"`
 	SeriesPos   string    `json:"seriesPosition,omitempty"`
 	CoverURL    string    `json:"coverUrl,omitempty"`
-	Ebook       []Edition `json:"ebook"`
-	Audio       []Edition `json:"audiobook"`
+	Ebook       []Edition `json:"ebook"`     // the most-read few
+	Audio       []Edition `json:"audiobook"` // the most-read few
 	HasPrint    bool      `json:"hasPrint"`
+	// Editions per format on Hardcover (in the configured language or none).
+	EbookCount int `json:"ebookEditions"`
+	AudioCount int `json:"audiobookEditions"`
+	PrintCount int `json:"printEditions"`
 }
 
 func (b Book) URL() string { return HardcoverBookURL(b.Slug, b.ID) }

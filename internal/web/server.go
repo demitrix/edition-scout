@@ -45,6 +45,12 @@ func New(svc *scout.Service, hc *hardcover.Client, version string) *Server {
 			return "Ebook"
 		},
 		"sourceName": sourceName,
+		"plural": func(n int, word string) string {
+			if n == 1 {
+				return "1 " + word
+			}
+			return strconv.Itoa(n) + " " + word + "s"
+		},
 		"first": func(eds []scout.Edition) *scout.Edition {
 			if len(eds) == 0 {
 				return nil

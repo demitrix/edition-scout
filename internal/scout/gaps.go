@@ -388,6 +388,7 @@ func (g *Gaps) store(job gapJob, eds []Edition, source string, tried []string) {
 type Status struct {
 	State    string    `json:"state"`            // on-hardcover | missing | none-found | pending | not-checked
 	Reason   string    `json:"reason,omitempty"` // why not-checked
+	Count    int       `json:"count,omitempty"`  // editions on Hardcover
 	Editions []Edition `json:"editions,omitempty"`
 	Source   string    `json:"source,omitempty"`
 	Checked  time.Time `json:"checked,omitempty"`
@@ -404,11 +405,14 @@ const (
 func (g *Gaps) Status(b Book, format string) Status {
 	switch {
 	case b.Has(format):
-		eds := b.Ebook
+		eds, n := b.Ebook, b.EbookCount
 		if format == FormatAudio {
-			eds = b.Audio
+			eds, n = b.Audio, b.AudioCount
 		}
-		return Status{State: StateOnHardcover, Editions: eds, Source: "hardcover"}
+		if n < len(eds) {
+			n = len(eds) // snapshots from before counts existed
+		}
+		return Status{State: StateOnHardcover, Editions: eds, Source: "hardcover", Count: n}
 	case format == FormatPrint:
 		return Status{State: StateNotChecked}
 	}

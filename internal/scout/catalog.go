@@ -19,9 +19,11 @@ type Catalog struct {
 	Lang Lang
 	// IncludeCompilations keeps boxed sets and omnibus volumes.
 	IncludeCompilations bool
-	// EditionsPerFormat caps the Hardcover editions shown per format.
-	EditionsPerFormat int
 }
+
+// editionDetail: Hardcover editions read in full per format (most-read
+// first); every edition is counted.
+const editionDetail = 3
 
 // SearchAuthors runs Hardcover's author search, dropping placeholder
 // records ("Various", "Unknown").
@@ -114,6 +116,10 @@ type hcEdition struct {
 	} `json:"contributions"`
 }
 
+type hcID struct {
+	ID int `json:"id"`
+}
+
 type hcBook struct {
 	ID          int    `json:"id"`
 	Title       string `json:"title"`
@@ -132,11 +138,11 @@ type hcBook struct {
 			Name string `json:"name"`
 		} `json:"series"`
 	} `json:"book_series"`
-	Audio []hcEdition `json:"audio"`
-	Ebook []hcEdition `json:"ebook"`
-	Print []struct {
-		ID int `json:"id"`
-	} `json:"print"`
+	Audio    []hcEdition `json:"audio"`
+	Ebook    []hcEdition `json:"ebook"`
+	AudioIDs []hcID      `json:"audio_ids"`
+	EbookIDs []hcID      `json:"ebook_ids"`
+	PrintIDs []hcID      `json:"print_ids"`
 }
 
 const authorRoleFilter = `_or: [{contribution: {_is_null: true}}, {contribution: {_eq: ""}}, {contribution: {_in: ["Author", "author", "AUTHOR"]}}]`
@@ -166,7 +172,9 @@ func (c *Catalog) worksQuery() string {
 			book_series(order_by: {position: asc}) { position featured series { name } }
 			audio: editions(where: {reading_format_id: {_eq: 2}, ` + lang + `}, order_by: [{users_count: desc}, {id: asc}], limit: $edLimit) { ` + edFields + ` }
 			ebook: editions(where: {reading_format_id: {_eq: 4}, ` + lang + `}, order_by: [{users_count: desc}, {id: asc}], limit: $edLimit) { ` + edFields + ` }
-			print: editions(where: {reading_format_id: {_eq: 1}, ` + lang + `}, limit: 1) { id }
+			audio_ids: editions(where: {reading_format_id: {_eq: 2}, ` + lang + `}) { id }
+			ebook_ids: editions(where: {reading_format_id: {_eq: 4}, ` + lang + `}) { id }
+			print_ids: editions(where: {reading_format_id: {_eq: 1}, ` + lang + `}) { id }
 		}
 	}`
 }
@@ -235,7 +243,7 @@ func (c *Catalog) works(ctx context.Context, authorID int) ([]hcBook, error) {
 				Books []hcBook `json:"books"`
 			} `json:"data"`
 		}
-		vars := map[string]any{"authorId": authorID, "limit": pageSize, "offset": offset, "edLimit": c.EditionsPerFormat}
+		vars := map[string]any{"authorId": authorID, "limit": pageSize, "offset": offset, "edLimit": editionDetail}
 		if err := c.HC.Query(ctx, q, vars, &resp); err != nil {
 			return nil, err
 		}
@@ -249,7 +257,8 @@ func (c *Catalog) works(ctx context.Context, authorID int) ([]hcBook, error) {
 
 func (c *Catalog) mapBook(hb hcBook) Book {
 	b := Book{ID: hb.ID, Title: hb.Title, Subtitle: hb.Subtitle, Slug: hb.Slug, Year: hb.ReleaseYear,
-		Readers: hb.UsersCount, Compilation: hb.Compilation, HasPrint: len(hb.Print) > 0,
+		Readers: hb.UsersCount, Compilation: hb.Compilation, HasPrint: len(hb.PrintIDs) > 0,
+		EbookCount: len(hb.EbookIDs), AudioCount: len(hb.AudioIDs), PrintCount: len(hb.PrintIDs),
 		Ebook: []Edition{}, Audio: []Edition{}}
 	if hb.Image != nil {
 		b.CoverURL = hb.Image.URL
