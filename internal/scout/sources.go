@@ -209,12 +209,17 @@ func (g *GoogleBooks) Lookup(ctx context.Context, title, author, _ string) ([]Ed
 		ed := Edition{Source: g.Name(), ID: it.ID, Format: FormatEbook, EditionFormat: "ebook", Title: v.Title,
 			Language: g.Lang.Name, Publisher: v.Publisher, Date: v.PublishedDate, Pages: v.PageCount,
 			URL: "https://books.google.com/books?id=" + it.ID, CoverURL: strings.Replace(v.ImageLinks.Thumbnail, "http://", "https://", 1)}
+		ed.addID("googlebooks", it.ID)
 		for _, id := range v.IndustryIdentifiers {
 			switch id.Type {
 			case "ISBN_13":
 				ed.ISBN13 = id.Identifier
 			case "ISBN_10":
 				ed.ISBN10 = id.Identifier
+			case "OTHER": // e.g. "OCLC:123", "LCCN:2017..."
+				if kind, v, ok := strings.Cut(id.Identifier, ":"); ok && (kind == "OCLC" || kind == "LCCN") {
+					ed.addID(strings.ToLower(kind), v)
+				}
 			}
 		}
 		out = append(out, ed)
@@ -258,15 +263,18 @@ func (o *OpenLibrary) Lookup(ctx context.Context, title, author, _ string) ([]Ed
 		}
 		var eds struct {
 			Entries []struct {
-				Key            string   `json:"key"`
-				Title          string   `json:"title"`
-				PhysicalFormat string   `json:"physical_format"`
-				Publishers     []string `json:"publishers"`
-				PublishDate    string   `json:"publish_date"`
-				Isbn13         []string `json:"isbn_13"`
-				Isbn10         []string `json:"isbn_10"`
-				Pages          int      `json:"number_of_pages"`
-				Covers         []int    `json:"covers"`
+				Key            string              `json:"key"`
+				Title          string              `json:"title"`
+				PhysicalFormat string              `json:"physical_format"`
+				Publishers     []string            `json:"publishers"`
+				PublishDate    string              `json:"publish_date"`
+				Isbn13         []string            `json:"isbn_13"`
+				Isbn10         []string            `json:"isbn_10"`
+				Pages          int                 `json:"number_of_pages"`
+				Covers         []int               `json:"covers"`
+				OCLC           []string            `json:"oclc_numbers"`
+				LCCN           []string            `json:"lccn"`
+				Identifiers    map[string][]string `json:"identifiers"`
 				Languages      []struct {
 					Key string `json:"key"`
 				} `json:"languages"`
@@ -297,6 +305,25 @@ func (o *OpenLibrary) Lookup(ctx context.Context, title, author, _ string) ([]Ed
 			}
 			if len(e.Covers) > 0 && e.Covers[0] > 0 {
 				ed.CoverURL = fmt.Sprintf("https://covers.openlibrary.org/b/id/%d-M.jpg", e.Covers[0])
+			}
+			ed.addID("openlibrary", ed.ID)
+			for kind, vals := range e.Identifiers {
+				for _, v := range vals {
+					switch kind {
+					case "amazon":
+						if ed.ASIN == "" && len(v) == 10 {
+							ed.ASIN = v
+						}
+					case "goodreads", "storygraph", "overdrive", "wikidata", "isfdb", "librarything", "musicbrainz":
+						ed.addID(kind, v)
+					}
+				}
+			}
+			for _, v := range e.OCLC {
+				ed.addID("oclc", v)
+			}
+			for _, v := range e.LCCN {
+				ed.addID("lccn", v)
 			}
 			out = append(out, ed)
 			if len(out) == 3 {

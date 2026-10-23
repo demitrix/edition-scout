@@ -288,15 +288,30 @@ func writeCSV(w http.ResponseWriter, rows []scout.ReportRow) {
 	w.Header().Set("Content-Disposition", `attachment; filename="missing-on-hardcover.csv"`)
 	cw := csv.NewWriter(w)
 	_ = cw.Write([]string{"author", "title", "format", "hardcover_url", "found_on", "edition_title", "edition_format",
-		"isbn13", "isbn10", "asin", "publisher", "date", "narrators", "duration_min", "pages", "source_url"})
+		"isbn13", "isbn10", "asin", "goodreads_id", "openlibrary_id", "google_books_id", "other_identifiers",
+		"publisher", "date", "narrators", "duration_min", "pages", "source_url"})
 	for _, r := range rows {
 		for _, e := range r.Editions {
 			_ = cw.Write([]string{r.AuthorName, r.Title, r.Format, r.HardcoverURL, sourceName(r.Source), e.Title, e.EditionFormat,
-				e.ISBN13, e.ISBN10, e.ASIN, e.Publisher, e.Date, strings.Join(e.Narrators, "; "),
+				e.ISBN13, e.ISBN10, e.ASIN, e.IDValue("goodreads"), e.IDValue("openlibrary"), e.IDValue("googlebooks"), otherIDs(e),
+				e.Publisher, e.Date, strings.Join(e.Narrators, "; "),
 				itoa(e.DurationMin), itoa(e.Pages), e.URL})
 		}
 	}
 	cw.Flush()
+}
+
+// otherIDs joins identifiers without their own CSV column ("kind:value; ...").
+func otherIDs(e scout.Edition) string {
+	var parts []string
+	for _, x := range e.IDs {
+		switch x.Kind {
+		case "goodreads", "openlibrary", "googlebooks":
+		default:
+			parts = append(parts, x.Kind+":"+x.Value)
+		}
+	}
+	return strings.Join(parts, "; ")
 }
 
 func itoa(n int) string {

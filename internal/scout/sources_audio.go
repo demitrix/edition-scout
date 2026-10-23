@@ -342,6 +342,7 @@ func (g *Goodreads) editions(ctx context.Context, workID, wantTitle string) (ebo
 		if v := grCover.FindStringSubmatch(b); v != nil {
 			ed.CoverURL = v[1]
 		}
+		ed.addID("goodreads", bookID) // from /book/show/<id>-slug
 		if kind == FormatAudio {
 			audio = append(audio, ed)
 		} else {

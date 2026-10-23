@@ -340,7 +340,7 @@ func (g *Gaps) lookup(job gapJob) {
 		if len(eds) > 0 {
 			g.store(job, eds, s.Name(), tried)
 			slog.Info("edition missing on Hardcover", "format", job.Format, "title", job.Title, "author", job.Author,
-				"found", s.Name(), "id", eds[0].ID, "identifier", eds[0].Identifier())
+				"found", s.Name(), "id", eds[0].ID, "isbn13", eds[0].ISBN13, "asin", eds[0].ASIN)
 			return
 		}
 	}

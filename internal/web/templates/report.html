@@ -9,12 +9,12 @@
 </div>
 {{if .Rows}}
 <div class="table-wrap"><table>
-<tr><th>Book</th><th>Missing</th><th>Found on</th><th>Identifier</th><th class="hide-sm">Publisher · date</th></tr>
+<tr><th>Book</th><th>Missing</th><th>Found on</th><th>Identifiers</th><th class="hide-sm">Publisher · date</th></tr>
 {{range .Rows}}{{$e := first .Editions}}<tr>
   <td><a href="{{.HardcoverURL}}" rel="noopener">{{.Title}}</a><div class="ed">{{.AuthorName}}</div></td>
   <td>{{label .Format}}</td>
   <td>{{with $e}}<a href="{{.URL}}" rel="noopener">{{sourceName .Source}}</a>{{if .EditionFormat}}<div class="ed">{{.EditionFormat}}</div>{{end}}{{end}}</td>
-  <td>{{with $e}}{{with .Identifier}}{{.}}{{else}}<span class="muted">—</span>{{end}}{{end}}</td>
+  <td>{{with $e}}{{if .Identifiers}}{{template "ids" .}}{{else}}<span class="muted">—</span>{{end}}{{end}}</td>
   <td class="hide-sm">{{with $e}}{{.Publisher}}{{if .Date}} · {{.Date}}{{end}}{{if .Narrators}}<div class="ed">read by {{join .Narrators ", "}}{{with .Duration}} · {{.}}{{end}}</div>{{end}}{{end}}</td>
 </tr>{{end}}
 </table></div>

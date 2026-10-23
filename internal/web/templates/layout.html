@@ -1,3 +1,8 @@
+{{define "ids"}}{{with .Identifiers}}<ul class="ids">{{range .}}<li>
+  <span class="lbl">{{.Label}}</span><code>{{.Value}}</code>
+  <button type="button" class="icon copy" data-copy="{{.Value}}" title="Copy {{.Label}}" aria-label="Copy {{.Label}} {{.Value}}"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="5" y="5" width="9" height="9" rx="1.5"/><path d="M11 5V3.5A1.5 1.5 0 0 0 9.5 2h-6A1.5 1.5 0 0 0 2 3.5v6A1.5 1.5 0 0 0 3.5 11H5"/></svg></button>
+  {{- if .URL}}<a class="icon" href="{{.URL}}" target="_blank" rel="noopener noreferrer" title="Open on {{.Label}}" aria-label="Open {{.Label}} {{.Value}} in a new tab"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M9 2h5v5M14 2 7.5 8.5M12 9.5v3A1.5 1.5 0 0 1 10.5 14h-7A1.5 1.5 0 0 1 2 12.5v-7A1.5 1.5 0 0 1 3.5 4h3"/></svg></a>{{end}}
+</li>{{end}}</ul>{{end}}{{end}}
 <!doctype html>
 <html lang="en">
 <head>
@@ -67,6 +72,15 @@ td.num { font-variant-numeric: tabular-nums; text-align: right; white-space: now
 .chip.wait { background: var(--wait-soft); color: var(--wait); }
 .ed { font-size: 13px; color: var(--muted); margin-top: 3px; }
 .ed a { font-weight: 600; }
+ul.ids { list-style: none; margin: 4px 0 0; padding: 0; font-size: 13px; }
+ul.ids li { display: flex; align-items: center; gap: 4px; white-space: nowrap; min-height: 26px; }
+ul.ids .lbl { color: var(--muted); min-width: 84px; }
+ul.ids code { font: 12px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; user-select: all; }
+.icon { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; padding: 0;
+  border: 1px solid transparent; border-radius: 6px; background: none; color: var(--muted); cursor: pointer; }
+.icon:hover, .icon:focus-visible { color: var(--accent); border-color: var(--line); background: var(--bg); text-decoration: none; }
+.icon svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.icon.done { color: var(--ok); }
 .author-head { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
 .author-head img { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; background: var(--line); }
 .author-head .actions { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; }
@@ -100,5 +114,29 @@ footer { color: var(--muted); font-size: 13px; padding: 24px 16px; text-align: c
   · sources: {{range $i, $s := .Sources}}{{if $i}}, {{end}}{{sourceName $s}}{{end}}{{end}}
   · <a href="/api/status">status</a> · {{.Version}}
 </footer>
+<script>
+// Copy buttons: the Clipboard API needs a secure origin (https or
+// localhost), so plain-http LAN installs fall back to execCommand.
+document.addEventListener("click", async (ev) => {
+  const btn = ev.target.closest("button.copy");
+  if (!btn) return;
+  const text = btn.dataset.copy;
+  let ok = false;
+  try {
+    if (navigator.clipboard && window.isSecureContext) { await navigator.clipboard.writeText(text); ok = true; }
+  } catch (_) {}
+  if (!ok) {
+    const ta = document.createElement("textarea");
+    ta.value = text; ta.setAttribute("readonly", ""); ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.select();
+    try { ok = document.execCommand("copy"); } catch (_) {}
+    ta.remove();
+  }
+  const title = btn.title;
+  btn.classList.toggle("done", ok);
+  btn.title = ok ? "Copied" : "Copy failed";
+  setTimeout(() => { btn.classList.remove("done"); btn.title = title; }, 1500);
+});
+</script>
 </body>
 </html>
