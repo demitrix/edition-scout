@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{.Title}} · edition-scout</title>
+{{block "head" .}}{{end}}
+<style>
+:root {
+  --bg: #f7f6f3; --surface: #ffffff; --text: #1d1d1b; --muted: #6b6a66; --line: #e3e1db;
+  --accent: #3b5bdb; --accent-soft: #e8edff;
+  --ok: #2b8a3e; --ok-soft: #e6f4ea; --warn: #b35c00; --warn-soft: #fff1e0;
+  --none: #868e96; --none-soft: #f1f3f5; --wait: #5f3dc4; --wait-soft: #efeafe;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #141413; --surface: #1d1d1b; --text: #ecebe6; --muted: #a09f99; --line: #34332f;
+    --accent: #8ea4ff; --accent-soft: #232a45;
+    --ok: #69db7c; --ok-soft: #1c3322; --warn: #ffb35c; --warn-soft: #3a2a17;
+    --none: #adb5bd; --none-soft: #26282b; --wait: #b197fc; --wait-soft: #2b2340;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #141413; --surface: #1d1d1b; --text: #ecebe6; --muted: #a09f99; --line: #34332f;
+  --accent: #8ea4ff; --accent-soft: #232a45;
+  --ok: #69db7c; --ok-soft: #1c3322; --warn: #ffb35c; --warn-soft: #3a2a17;
+  --none: #adb5bd; --none-soft: #26282b; --wait: #b197fc; --wait-soft: #2b2340;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text);
+  font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+a { color: var(--accent); text-decoration: none; } a:hover { text-decoration: underline; }
+header.top { background: var(--surface); border-bottom: 1px solid var(--line); }
+header.top .wrap { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; padding-top: 12px; padding-bottom: 12px; }
+.brand { font-weight: 700; color: var(--text); letter-spacing: -.01em; }
+nav a { margin-right: 14px; color: var(--muted); } nav a:hover { color: var(--text); }
+form.search { display: flex; gap: 8px; flex: 1 1 260px; max-width: 460px; margin-left: auto; }
+input[type=search] { flex: 1; min-width: 0; padding: 7px 10px; border: 1px solid var(--line); border-radius: 8px;
+  background: var(--bg); color: var(--text); font: inherit; }
+button, .button { padding: 7px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface);
+  color: var(--text); font: inherit; cursor: pointer; }
+button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+button.danger { color: var(--warn); }
+.wrap { max-width: 1180px; margin: 0 auto; padding-left: 16px; padding-right: 16px; }
+main.wrap { padding-top: 24px; padding-bottom: 48px; }
+h1 { font-size: 26px; margin: 0 0 4px; letter-spacing: -.01em; }
+h2 { font-size: 18px; margin: 28px 0 10px; }
+.muted { color: var(--muted); } .small { font-size: 13px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 16px 0; }
+.tile { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+.tile b { display: block; font-size: 24px; font-variant-numeric: tabular-nums; }
+.tile.warn b { color: var(--warn); } .tile.wait b { color: var(--wait); } .tile.ok b { color: var(--ok); }
+.table-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+table { width: 100%; border-collapse: collapse; }
+th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); font-weight: 600; white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+td.num { font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.chip { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+.chip.ok { background: var(--ok-soft); color: var(--ok); }
+.chip.warn { background: var(--warn-soft); color: var(--warn); }
+.chip.none { background: var(--none-soft); color: var(--none); }
+.chip.wait { background: var(--wait-soft); color: var(--wait); }
+.ed { font-size: 13px; color: var(--muted); margin-top: 3px; }
+.ed a { font-weight: 600; }
+.author-head { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+.author-head img { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; background: var(--line); }
+.author-head .actions { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; }
+.notice { background: var(--wait-soft); color: var(--text); border-radius: 10px; padding: 10px 14px; margin: 12px 0; }
+.hits { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+.hit { display: flex; gap: 12px; align-items: center; }
+.hit img, .hit .ph { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; background: var(--line); flex: none; }
+.cover { width: 34px; height: 50px; object-fit: cover; border-radius: 3px; background: var(--line); flex: none; }
+.bookcell { display: flex; gap: 10px; }
+footer { color: var(--muted); font-size: 13px; padding: 24px 16px; text-align: center; }
+.filters a { margin-right: 12px; } .filters a.on { color: var(--text); font-weight: 600; }
+@media (max-width: 640px) { .hide-sm { display: none; } th, td { padding: 8px; } }
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="brand" href="/">edition-scout</a>
+  <nav><a href="/">Authors</a><a href="/report">Missing on Hardcover</a></nav>
+  <form class="search" action="/search" method="get" role="search">
+    <input type="search" name="q" value="{{.Query}}" placeholder="Search Hardcover authors" aria-label="Author name" required>
+    <button class="primary" type="submit">Search</button>
+  </form>
+</div></header>
+<main class="wrap">
+{{if not .Status.Configured}}<div class="notice">HARDCOVER_API_TOKEN isn't set. Get one at hardcover.app → Settings → API, then restart.</div>{{end}}
+{{template "content" .}}
+</main>
+<footer>
+  {{with .Status}}Lookups queued: {{range $f, $n := .Pending}}{{$n}} {{$f}} {{else}}none{{end}}
+  {{range $s, $t := .Paused}}· {{sourceName $s}} paused until {{$t.Local.Format "Jan 2 15:04"}} {{end}}
+  · sources: {{range $i, $s := .Sources}}{{if $i}}, {{end}}{{sourceName $s}}{{end}}{{end}}
+  · <a href="/api/status">status</a> · {{.Version}}
+</footer>
+</body>
+</html>

@@ -1,0 +1,49 @@
+{{define "head"}}{{if .Data.Building}}<meta http-equiv="refresh" content="8">{{end}}{{end}}
+{{define "fmtcell"}}
+{{- if eq .State "on-hardcover"}}<span class="chip ok">On Hardcover</span>{{with first .Editions}}{{with .Identifier}}<div class="ed">{{.}}</div>{{end}}{{end}}
+{{- else if eq .State "missing"}}<span class="chip warn">Missing</span>
+  {{with first .Editions}}<div class="ed">Found on <a href="{{.URL}}" rel="noopener">{{sourceName .Source}}</a>{{with .Identifier}} · {{.}}{{end}}</div>
+  <div class="ed">{{.Publisher}}{{if .Date}} · {{.Date}}{{end}}{{if .Narrators}} · read by {{join .Narrators ", "}}{{end}}{{with .Duration}} · {{.}}{{end}}</div>{{end}}
+{{- else if eq .State "none-found"}}<span class="chip none">None found</span><div class="ed">checked {{date .Checked}}</div>
+{{- else if eq .State "pending"}}<span class="chip wait">Checking…</span>
+{{- else}}<span class="muted">—</span>{{with .Reason}}<div class="ed">not looked up: {{.}}</div>{{end}}{{end}}
+{{- end}}
+{{define "content"}}
+{{with .Data}}
+<div class="author-head">
+  {{if .Author.ImageURL}}<img src="{{.Author.ImageURL}}" alt="">{{end}}
+  <div>
+    <h1>{{.Author.Name}}</h1>
+    <div class="muted small"><a href="{{.Author.URL}}" rel="noopener">View on Hardcover</a> · updated {{ago .Author.Built}}</div>
+  </div>
+  <div class="actions">
+    <form method="post" action="/author/{{.Author.ID}}/refresh"><button type="submit">Refresh now</button></form>
+    <form method="post" action="/author/{{.Author.ID}}/remove"><button class="danger" type="submit">Remove</button></form>
+  </div>
+</div>
+{{if .Building}}<div class="notice">Updating from Hardcover… this page reloads by itself.</div>{{end}}
+
+<div class="tiles">
+  <div class="tile"><b>{{.Counts.Books}}</b>books on Hardcover</div>
+  <div class="tile warn"><b>{{.Counts.MissingEbook}}</b>ebooks missing on Hardcover</div>
+  <div class="tile warn"><b>{{.Counts.MissingAudio}}</b>audiobooks missing on Hardcover</div>
+  <div class="tile wait"><b>{{.Counts.Pending}}</b>lookups still running</div>
+</div>
+{{if not .Enabled.audiobook}}<p class="muted small">Audiobook lookups are off: set SCOUT_AUDIBLE_REGION or SCOUT_GOODREADS to enable them.</p>{{end}}
+
+<p class="filters small"><a href="?"{{if not .OnlyGaps}} class="on"{{end}}>All books</a><a href="?show=gaps"{{if .OnlyGaps}} class="on"{{end}}>Only books missing a format</a></p>
+<div class="table-wrap"><table>
+<tr><th>Book</th><th>Ebook</th><th>Audiobook</th><th class="hide-sm">Print</th><th class="num hide-sm">Readers</th></tr>
+{{range .Books}}<tr>
+  <td><div class="bookcell">{{if .CoverURL}}<img class="cover" src="{{.CoverURL}}" alt="" loading="lazy">{{end}}<div>
+    <a href="{{.URL}}" rel="noopener">{{.Title}}</a>{{if .Compilation}} <span class="chip none">collection</span>{{end}}
+    <div class="ed">{{if .Series}}{{.Series}}{{if .SeriesPos}} #{{.SeriesPos}}{{end}}{{end}}{{if and .Series .Year}} · {{end}}{{if .Year}}{{.Year}}{{end}}</div>
+  </div></div></td>
+  <td>{{template "fmtcell" .Ebook}}</td>
+  <td>{{template "fmtcell" .Audio}}</td>
+  <td class="hide-sm">{{if .HasPrint}}<span class="chip ok">On Hardcover</span>{{else}}<span class="muted">—</span>{{end}}</td>
+  <td class="num hide-sm">{{.Readers}}</td>
+</tr>{{else}}<tr><td colspan="5" class="muted">No books to show.</td></tr>{{end}}
+</table></div>
+{{end}}
+{{end}}

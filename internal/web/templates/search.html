@@ -1,0 +1,14 @@
+{{define "content"}}
+<h1>Authors matching “{{.Query}}”</h1>
+<p class="muted">From Hardcover's search. Opening an author adds them to your list.</p>
+{{if .Data}}
+<div class="hits">
+{{range .Data}}<a class="card hit" href="/author/{{.ID}}">
+  {{if .ImageURL}}<img src="{{.ImageURL}}" alt="" loading="lazy">{{else}}<span class="ph"></span>{{end}}
+  <span><b>{{.Name}}</b><br><span class="muted small">{{.BooksCount}} books{{if .KnownFor}} · {{join .KnownFor ", "}}{{end}}</span></span>
+</a>{{end}}
+</div>
+{{else}}
+<div class="card"><p>No authors found.</p></div>
+{{end}}
+{{end}}

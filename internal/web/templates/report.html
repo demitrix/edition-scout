@@ -1,0 +1,32 @@
+{{define "content"}}
+{{with .Data}}
+<h1>Missing on Hardcover</h1>
+<p class="muted">Editions that exist elsewhere but not on Hardcover, for the authors in your list. Each row has what you need to add the edition on Hardcover. <a href="?format=csv">Download CSV</a> · <a href="/api/report">JSON</a></p>
+<div class="tiles">
+  <div class="tile warn"><b>{{.Ebooks}}</b>ebooks</div>
+  <div class="tile warn"><b>{{.Audio}}</b>audiobooks</div>
+  <div class="tile ok"><b>{{len .Resolved}}</b>added on Hardcover (14 days)</div>
+</div>
+{{if .Rows}}
+<div class="table-wrap"><table>
+<tr><th>Book</th><th>Missing</th><th>Found on</th><th>Identifier</th><th class="hide-sm">Publisher · date</th></tr>
+{{range .Rows}}{{$e := first .Editions}}<tr>
+  <td><a href="{{.HardcoverURL}}" rel="noopener">{{.Title}}</a><div class="ed">{{.AuthorName}}</div></td>
+  <td>{{label .Format}}</td>
+  <td>{{with $e}}<a href="{{.URL}}" rel="noopener">{{sourceName .Source}}</a>{{if .EditionFormat}}<div class="ed">{{.EditionFormat}}</div>{{end}}{{end}}</td>
+  <td>{{with $e}}{{with .Identifier}}{{.}}{{else}}<span class="muted">—</span>{{end}}{{end}}</td>
+  <td class="hide-sm">{{with $e}}{{.Publisher}}{{if .Date}} · {{.Date}}{{end}}{{if .Narrators}}<div class="ed">read by {{join .Narrators ", "}}{{with .Duration}} · {{.}}{{end}}</div>{{end}}{{end}}</td>
+</tr>{{end}}
+</table></div>
+{{else}}
+<div class="card"><p>Nothing found yet. Lookups run in the background after you open an author.</p></div>
+{{end}}
+{{if .Resolved}}
+<h2>Added on Hardcover recently</h2>
+<div class="table-wrap"><table>
+<tr><th>Book</th><th>Format</th><th>Noticed</th></tr>
+{{range .Resolved}}<tr><td>{{.Title}}<div class="ed">{{.AuthorName}}</div></td><td>{{label .Format}}</td><td class="muted">{{date .ResolvedAt}}</td></tr>{{end}}
+</table></div>
+{{end}}
+{{end}}
+{{end}}

@@ -1,0 +1,14 @@
+services:
+  edition-scout:
+    build: .
+    image: edition-scout:latest
+    container_name: edition-scout
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "8080:8080"
+    volumes:
+      - scout-data:/data
+
+volumes:
+  scout-data:

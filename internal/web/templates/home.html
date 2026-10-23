@@ -1,0 +1,19 @@
+{{define "content"}}
+<h1>Authors</h1>
+<p class="muted">Search for an author to see their Hardcover catalogue and which ebook and audiobook editions Hardcover is missing. Authors you open stay here and are re-checked in the background.</p>
+{{if .Data}}
+<div class="table-wrap"><table>
+<tr><th>Author</th><th class="num">Books</th><th class="num">Ebooks missing</th><th class="num">Audiobooks missing</th><th class="num hide-sm">Checking</th><th class="hide-sm">Updated</th></tr>
+{{range .Data}}<tr>
+  <td><a href="/author/{{.ID}}">{{if .Name}}{{.Name}}{{else}}Author {{.ID}}{{end}}</a>{{if .Building}} <span class="chip wait">updating</span>{{end}}{{if .NotFound}} <span class="chip none">not on Hardcover</span>{{end}}</td>
+  <td class="num">{{.Books}}</td>
+  <td class="num">{{if .MissingEbook}}<span class="chip warn">{{.MissingEbook}}</span>{{else}}<span class="muted">0</span>{{end}}</td>
+  <td class="num">{{if .MissingAudio}}<span class="chip warn">{{.MissingAudio}}</span>{{else}}<span class="muted">0</span>{{end}}</td>
+  <td class="num hide-sm">{{if .Pending}}<span class="chip wait">{{.Pending}}</span>{{else}}<span class="muted">—</span>{{end}}</td>
+  <td class="hide-sm muted small">{{ago .Built}}</td>
+</tr>{{end}}
+</table></div>
+{{else}}
+<div class="card"><p>No authors yet. Use the search box above, or enter a numeric Hardcover author id.</p></div>
+{{end}}
+{{end}}
