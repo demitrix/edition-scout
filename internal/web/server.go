@@ -14,8 +14,8 @@ import (
 	"strings"
 	"time"
 
-	"edition-scout/internal/hardcover"
-	"edition-scout/internal/scout"
+	"github.com/demitrix/edition-scout/internal/hardcover"
+	"github.com/demitrix/edition-scout/internal/scout"
 )
 
 //go:embed templates/*.html

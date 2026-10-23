@@ -1,4 +1,4 @@
-module edition-scout
+module github.com/demitrix/edition-scout
 
 go 1.26.0
 

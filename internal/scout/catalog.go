@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	"edition-scout/internal/hardcover"
+	"github.com/demitrix/edition-scout/internal/hardcover"
 )
 
 // Catalog reads authors and their works from Hardcover.

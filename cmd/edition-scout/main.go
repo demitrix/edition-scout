@@ -14,9 +14,9 @@ import (
 	"syscall"
 	"time"
 
-	"edition-scout/internal/hardcover"
-	"edition-scout/internal/scout"
-	"edition-scout/internal/web"
+	"github.com/demitrix/edition-scout/internal/hardcover"
+	"github.com/demitrix/edition-scout/internal/scout"
+	"github.com/demitrix/edition-scout/internal/web"
 )
 
 var version = "dev"
