@@ -86,4 +86,4 @@ HARDCOVER_API_TOKEN=... SCOUT_DATA_DIR=./data ./edition-scout
 
 The title matching and gap-finding logic started in a fork of [Bindery](https://github.com/vavallee/bindery) (MIT). Book data comes from Hardcover, Audible, Google Books, Open Library and (optionally) Goodreads. edition-scout isn't affiliated with any of them.
 
-Licensed under MIT (see `LICENSE`). Binaries include the Go standard library and `golang.org/x/text` under BSD-3-Clause (see `THIRD_PARTY_NOTICES`; also at `/licenses` in the image).
+Licensed under MIT (see `LICENSE`). `THIRD_PARTY_NOTICES` has Bindery's MIT notice and the BSD-3-Clause notice for the Go standard library and `golang.org/x/text`, which are built into the binaries. The notices are also at `/licenses` in the image.
