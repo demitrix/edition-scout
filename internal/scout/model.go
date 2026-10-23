@@ -40,17 +40,20 @@ type Edition struct {
 	Readers       int      `json:"readers,omitempty"` // Hardcover only
 }
 
-// Identifier is the most useful single identifier for display.
+// Identifier lists the edition's ISBN and ASIN for display ("ISBN … ·
+// ASIN …"), preferring ISBN-13 over ISBN-10.
 func (e Edition) Identifier() string {
-	switch {
-	case e.ISBN13 != "":
-		return "ISBN " + e.ISBN13
-	case e.ASIN != "":
-		return "ASIN " + e.ASIN
-	case e.ISBN10 != "":
-		return "ISBN " + e.ISBN10
+	var parts []string
+	if isbn := e.ISBN13; isbn != "" || e.ISBN10 != "" {
+		if isbn == "" {
+			isbn = e.ISBN10
+		}
+		parts = append(parts, "ISBN "+isbn)
 	}
-	return ""
+	if e.ASIN != "" {
+		parts = append(parts, "ASIN "+e.ASIN)
+	}
+	return strings.Join(parts, " · ")
 }
 
 // Duration formats DurationMin as "12 h 5 min".

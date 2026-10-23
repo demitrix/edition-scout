@@ -25,7 +25,7 @@ When Hardcover has no ebook or no audiobook edition of a book, edition-scout ask
 
 | Format | Sources | Notes |
 |---|---|---|
-| Audiobook | **Audible** catalogue, then Goodreads (if enabled) | Audible's public catalogue API (no key). Gives narrators, runtime and ASIN. Region via `SCOUT_AUDIBLE_REGION`. |
+| Audiobook | **Audible** catalogue, then Goodreads (if enabled) | Audible's public catalogue API (no key). Gives the ASIN, the audiobook's ISBN when it has one (Audible originals often don't), narrators and runtime. Region via `SCOUT_AUDIBLE_REGION`. |
 | Ebook | Goodreads (if enabled), then **Google Books**, then **Open Library** | Google Books needs a free API key (1,000 requests a day). Open Library only counts editions explicitly labelled as ebooks. |
 
 Matching is strict. The title must agree, allowing a series prefix or subtitle but not a different instalment ("Season 2", "Book 3"). The author must be credited, and the edition must be in your language. A miss is fine; a wrong edition isn't.

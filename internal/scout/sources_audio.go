@@ -49,7 +49,7 @@ func (a *Audible) Supports(format string) bool { return format == FormatAudio }
 func (a *Audible) Lookup(ctx context.Context, title, author, _ string) ([]Edition, error) {
 	tld := audibleTLD[a.Region]
 	u := "https://api.audible." + tld + "/1.0/catalog/products?num_results=20&products_sort_by=Relevance" +
-		"&response_groups=contributors,product_attrs,media&title=" + urlQuery(title) + "&author=" + urlQuery(author)
+		"&response_groups=contributors,product_attrs,product_details,media&title=" + urlQuery(title) + "&author=" + urlQuery(author)
 	var resp struct {
 		Products []struct {
 			ASIN     string `json:"asin"`
@@ -61,6 +61,7 @@ func (a *Audible) Lookup(ctx context.Context, title, author, _ string) ([]Editio
 			Narrators []struct {
 				Name string `json:"name"`
 			} `json:"narrators"`
+			ISBN        string            `json:"isbn"` // the audiobook's own; not every title has one
 			Publisher   string            `json:"publisher_name"`
 			ReleaseDate string            `json:"release_date"`
 			Runtime     int               `json:"runtime_length_min"`
@@ -94,6 +95,12 @@ func (a *Audible) Lookup(ctx context.Context, title, author, _ string) ([]Editio
 		ed := Edition{Source: a.Name(), ID: p.ASIN, Format: FormatAudio, EditionFormat: p.FormatType, Title: p.Title,
 			Language: a.Lang.Name, Publisher: p.Publisher, Date: p.ReleaseDate, ASIN: p.ASIN, DurationMin: p.Runtime,
 			URL: "https://www.audible." + tld + "/pd/" + p.ASIN}
+		switch isbn := strings.ReplaceAll(p.ISBN, "-", ""); len(isbn) {
+		case 13:
+			ed.ISBN13 = isbn
+		case 10:
+			ed.ISBN10 = isbn
+		}
 		for _, n := range p.Narrators {
 			ed.Narrators = append(ed.Narrators, n.Name)
 		}

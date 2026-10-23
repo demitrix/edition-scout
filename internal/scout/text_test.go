@@ -63,6 +63,9 @@ func TestGapKeyAndStatus(t *testing.T) {
 	if st := g.Status(b, FormatAudio); st.State != StateNotChecked {
 		t.Fatalf("audio status = %+v", st)
 	}
+	if id := (Edition{ISBN13: "9781452686349", ASIN: "B00HG06ZVU"}).Identifier(); id != "ISBN 9781452686349 · ASIN B00HG06ZVU" {
+		t.Fatalf("Identifier() = %q", id)
+	}
 	if gapKey(7, FormatAudio) != "7/audiobook" {
 		t.Fatal("gap key format changed; persisted state would be orphaned")
 	}
