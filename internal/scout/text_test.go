@@ -54,6 +54,25 @@ func TestPlaceholders(t *testing.T) {
 	}
 }
 
+func TestISBNFits(t *testing.T) {
+	en, _ := LookupLanguage("en")
+	for _, c := range []struct {
+		isbn13, isbn10 string
+		want           bool
+	}{
+		{"9781501977824", "", true},  // US
+		{"9798887073712", "", true},  // US 979-8
+		{"9789189298323", "", false}, // Sweden
+		{"", "1501977822", true},
+		{"", "3453318625", false}, // German ISBN-10
+		{"", "", true},            // nothing to judge by
+	} {
+		if got := en.ISBNFits(c.isbn13, c.isbn10); got != c.want {
+			t.Errorf("ISBNFits(%q, %q) = %v, want %v", c.isbn13, c.isbn10, got, c.want)
+		}
+	}
+}
+
 func TestGapKeyAndStatus(t *testing.T) {
 	g := NewGaps(nil, "")
 	b := Book{ID: 7, Title: "Book", Ebook: []Edition{{Source: "hardcover", ID: "1", ISBN13: "9780000000001"}}}

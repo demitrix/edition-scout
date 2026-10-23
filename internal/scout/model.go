@@ -229,16 +229,39 @@ type Lang struct {
 	Code3   string // OpenLibrary
 	Name    string // Goodreads ("English")
 	Audible string // Audible ("english")
+	// ISBNGroups: ISBN-13 prefixes (EAN prefix + registration group) of
+	// the countries or language areas that mostly publish in this language.
+	ISBNGroups []string
 }
 
 var languages = map[string]Lang{
-	"en": {"en", "eng", "English", "english"},
-	"de": {"de", "ger", "German", "german"},
-	"fr": {"fr", "fre", "French", "french"},
-	"es": {"es", "spa", "Spanish", "spanish"},
-	"it": {"it", "ita", "Italian", "italian"},
-	"nl": {"nl", "dut", "Dutch", "dutch"},
-	"pt": {"pt", "por", "Portuguese", "portuguese"},
+	"en": {"en", "eng", "English", "english", []string{"9780", "9781", "9798"}},
+	"de": {"de", "ger", "German", "german", []string{"9783"}},
+	"fr": {"fr", "fre", "French", "french", []string{"9782", "97910"}},
+	"es": {"es", "spa", "Spanish", "spanish", []string{"97884", "978950", "978956", "978958", "978968", "978970", "978987", "978607", "978612", "978980"}},
+	"it": {"it", "ita", "Italian", "italian", []string{"97888", "97912"}},
+	"nl": {"nl", "dut", "Dutch", "dutch", []string{"97890", "97894"}},
+	"pt": {"pt", "por", "Portuguese", "portuguese", []string{"97885", "978972", "978989", "97865"}},
+}
+
+// ISBNFits reports whether an edition's ISBN belongs to one of the
+// language's registration groups. Used when a source records no language:
+// an English-language source listing a Swedish edition with no language
+// set is caught by its 978-91 ISBN. No ISBN at all fits.
+func (l Lang) ISBNFits(isbn13, isbn10 string) bool {
+	isbn := strings.ReplaceAll(isbn13, "-", "")
+	if isbn == "" && isbn10 != "" {
+		isbn = "978" + strings.ReplaceAll(isbn10, "-", "")
+	}
+	if len(isbn) != 13 {
+		return true
+	}
+	for _, g := range l.ISBNGroups {
+		if strings.HasPrefix(isbn, g) {
+			return true
+		}
+	}
+	return false
 }
 
 func LookupLanguage(code string) (Lang, bool) {

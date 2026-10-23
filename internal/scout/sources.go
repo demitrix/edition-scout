@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -230,7 +231,7 @@ func (g *GoogleBooks) Lookup(ctx context.Context, title, author, _ string) ([]Ed
 	return out, nil
 }
 
-// ---- OpenLibrary (ebooks) ----
+// ---- OpenLibrary (ebooks and audiobooks) ----
 
 type OpenLibrary struct {
 	Lang Lang
@@ -242,10 +243,20 @@ func NewOpenLibrary(lang Lang) *OpenLibrary {
 	return &OpenLibrary{Lang: lang, http: &http.Client{Timeout: 20 * time.Second}, p: pacer{interval: time.Second}}
 }
 
-func (o *OpenLibrary) Name() string                { return "openlibrary" }
-func (o *OpenLibrary) Supports(format string) bool { return format == FormatEbook }
+func (o *OpenLibrary) Name() string { return "openlibrary" }
+func (o *OpenLibrary) Supports(format string) bool {
+	return format == FormatEbook || format == FormatAudio
+}
 
-func (o *OpenLibrary) Lookup(ctx context.Context, title, author, _ string) ([]Edition, error) {
+// olAudioFormat: Open Library's labels for audiobook editions
+// ("eAudiobook", "Audio CD", "MP3 CD", "Audio Cassette", "audiobook").
+var olAudioFormat = regexp.MustCompile(`(?i)\b(e?audio\s*books?|audio|mp3|cassette)\b`)
+
+func (o *OpenLibrary) Lookup(ctx context.Context, title, author, format string) ([]Edition, error) {
+	want := ebookFormat
+	if format == FormatAudio {
+		want = olAudioFormat
+	}
 	var search struct {
 		Docs []struct {
 			Key        string   `json:"key"`
@@ -286,20 +297,23 @@ func (o *OpenLibrary) Lookup(ctx context.Context, title, author, _ string) ([]Ed
 		var out []Edition
 		for _, e := range eds.Entries {
 			// OpenLibrary often leaves formats blank: only editions explicitly
-			// labelled as ebooks count.
-			if !ebookFormat.MatchString(e.PhysicalFormat) {
+			// labelled with the wanted format count.
+			if !want.MatchString(e.PhysicalFormat) || (format == FormatEbook && olAudioFormat.MatchString(e.PhysicalFormat)) {
 				continue
 			}
-			ok := len(e.Languages) == 0
+			ok := len(e.Languages) == 0 && o.Lang.ISBNFits(firstOf(e.Isbn13), firstOf(e.Isbn10))
 			for _, l := range e.Languages {
 				ok = ok || l.Key == "/languages/"+o.Lang.Code3
 			}
 			if !ok {
 				continue
 			}
-			ed := Edition{Source: o.Name(), ID: strings.TrimPrefix(e.Key, "/books/"), Format: FormatEbook,
+			ed := Edition{Source: o.Name(), ID: strings.TrimPrefix(e.Key, "/books/"), Format: format,
 				EditionFormat: e.PhysicalFormat, Title: e.Title, Language: o.Lang.Name, Date: e.PublishDate,
-				ISBN13: firstOf(e.Isbn13), ISBN10: firstOf(e.Isbn10), Pages: e.Pages, URL: "https://openlibrary.org" + e.Key}
+				ISBN13: firstOf(e.Isbn13), ISBN10: firstOf(e.Isbn10), URL: "https://openlibrary.org" + e.Key}
+			if format == FormatEbook {
+				ed.Pages = e.Pages
+			}
 			if len(e.Publishers) > 0 {
 				ed.Publisher = e.Publishers[0]
 			}

@@ -25,8 +25,8 @@ When Hardcover has no ebook or no audiobook edition of a book, edition-scout ask
 
 | Format | Sources | Notes |
 |---|---|---|
-| Audiobook | **Audible** catalogue, then Goodreads (if enabled) | Audible's public catalogue API (no key). Gives the ASIN, the audiobook's ISBN when it has one (Audible originals often don't), narrators and runtime. Region via `SCOUT_AUDIBLE_REGION`. |
-| Ebook | Goodreads (if enabled), then **Google Books**, then **Open Library** | Google Books needs a free API key (1,000 requests a day). Open Library only counts editions explicitly labelled as ebooks. |
+| Audiobook | **Audible** catalogue, then Goodreads (if enabled), then **Open Library** | Audible's public catalogue API (no key). Gives the ASIN, the audiobook's ISBN when it has one (Audible originals often don't), narrators and runtime. Region via `SCOUT_AUDIBLE_REGION`. |
+| Ebook | Goodreads (if enabled), then **Google Books**, then **Open Library** | Google Books needs a free API key (1,000 requests a day). Open Library only counts editions explicitly labelled with the format ("eBook", "Kindle"; "eAudiobook", "Audio CD"). |
 
 Matching is strict. The title must agree, allowing a series prefix or subtitle but not a different instalment ("Season 2", "Book 3"). The author must be credited, and the edition must be in your language. A miss is fine; a wrong edition isn't.
 
@@ -49,7 +49,7 @@ Goodreads has had no public API since 2020. With `SCOUT_GOODREADS=true`, edition
 | `GOOGLE_BOOKS_API_KEY` | — | Recommended: enables Google Books for ebooks. |
 | `SCOUT_AUDIBLE_REGION` | `us` | `us uk ca au de fr it es in jp`, or `off`. |
 | `SCOUT_GOODREADS` | `false` | Opt-in Goodreads lookups (see above). |
-| `SCOUT_OPENLIBRARY` | `true` | Open Library for ebooks. |
+| `SCOUT_OPENLIBRARY` | `true` | Open Library for ebooks and audiobooks. |
 | `SCOUT_LANGUAGE` | `en` | Edition language: `en de fr es it nl pt`. |
 | `SCOUT_REFRESH_INTERVAL` | `24h` | How often followed authors are re-read from Hardcover. |
 | `SCOUT_PRINT_ONLY_MIN_READERS` | `5` | Print-only books are looked up from this many readers. |
